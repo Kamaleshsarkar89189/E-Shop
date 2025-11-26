@@ -286,3 +286,135 @@ export const getAllSellers = async (
         next(error);
     }
 }
+
+// get all notifications
+// export const getAllNotifications = async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+// ) => {
+//     try {
+//         const notifications = await prisma.notifications.findMany({
+//             where: {
+//                 receiverId: "admin",
+//             },
+//             orderBy: {
+//                 createdAt: "desc",
+//             },
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             notifications,
+//         });
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
+
+export const getAllNotifications = async (req, res, next) => {
+    try {
+        const admin = await prisma.users.findFirst({
+            where: { role: "admin" },
+            select: { id: true },
+        });
+
+        const notifications = await prisma.notifications.findMany({
+            where: {
+                receiverId: admin?.id,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            notifications,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// get all users notification
+export const getUserNotifications = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const notifications = await prisma.notifications.findMany({
+            where: {
+                receiverId: req.user.id,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            notifications,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// fetching notifications for sellers
+export const sellerNotifications = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const sellerId = req.seller.id;
+
+        const notifications = await prisma.notifications.findMany({
+            where: {
+                receiverId: sellerId,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            notifications,
+        });
+    } catch (error) {
+
+    }
+}
+
+// mark notification as read
+export const markNotificationAsRead = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { notificationId } = req.body;
+
+        if (!notificationId) {
+            return next(new ValidationError("Notification id is required!"));
+        }
+
+        const notification = await prisma.notifications.update({
+            where: { id: notificationId },
+            data: { read: true },
+        });
+
+        // Code below this line is inferred to complete the logic
+        res.status(200).json({
+            success: true,
+            message: "Notification marked as read",
+            data: notification,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

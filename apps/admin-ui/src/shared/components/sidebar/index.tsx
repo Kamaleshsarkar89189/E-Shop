@@ -1,7 +1,7 @@
 'use client'
 import useAdmin from 'apps/admin-ui/src/hooks/useAdmin';
 import useSidebar from 'apps/admin-ui/src/hooks/useSidebar';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect } from 'react'
 import Box from '../box';
 import { Sidebar } from './sidebar.styles';
@@ -12,11 +12,14 @@ import Home from 'apps/admin-ui/src/app/assets/svgs/home';
 import SidebarMenu from './sidebar.menu';
 import { BellPlus, BellRing, FileClock, ListOrdered, LogOut, PackageSearch, PencilRuler, Settings, Store, Users } from 'lucide-react';
 import Payment from 'apps/admin-ui/src/app/assets/svgs/payment';
+import axiosInstance from 'apps/admin-ui/src/utils/axiosInstance';
+import { QueryClient } from '@tanstack/react-query';
 
 const SidebarWrapper = () => {
   const { activeSidebar, setActiveSidebar } = useSidebar();
   const pathName = usePathname();
   const { admin } = useAdmin()
+  const router = useRouter();
 
   useEffect(() => {
     setActiveSidebar(pathName);
@@ -24,6 +27,17 @@ const SidebarWrapper = () => {
 
   const getIconColor = (route: string) =>
     activeSidebar === route ? "#0085ff" : "#969696";
+
+  const adminLogoutHandler = async () => {
+    try {
+      await axiosInstance.post("/api/logout-admin");
+
+      router.push("/");
+    } catch (err) {
+      console.error("Admin logout failed:", err);
+    }
+  };
+
 
   return (
     <Box
@@ -40,7 +54,7 @@ const SidebarWrapper = () => {
     >
       <Sidebar.Header>
         <Box>
-          <Link href={"/"} className="flex justify-center text-center gap-2">
+          <Link href={"/dashboard"} className="flex justify-center text-center gap-2">
             <Logo />
             <Box>
               <h3 className="text-xl font-medium text-[#ecedee]">
@@ -173,8 +187,9 @@ const SidebarWrapper = () => {
               <SidebarItem
                 isActive={activeSidebar === "/logout"}
                 title="Logout"
-                href="/"
+                // href="/"
                 icon={<LogOut size={20} color={getIconColor("/logout")} />}
+                onClick={adminLogoutHandler}
               />
             </SidebarMenu>
           </div>

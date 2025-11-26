@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { Prisma } from "generated/prisma";
 import Stripe from "stripe";
 import { sendEmail } from "../utils/send-email";
+import { sendLog } from "@packages/utils/logs/send-logs";
 
 
 // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -273,7 +274,7 @@ export const createOrder = async (
                 }
 
                 // Create order
-                await prisma.orders.create({
+                const order = await prisma.orders.create({
                     data: {
                         userId,
                         shopId,
@@ -363,7 +364,7 @@ export const createOrder = async (
                         totalAmount: coupon?.discountAmount
                             ? totalAmount - coupon?.discountAmount
                             : totalAmount,
-                        trackingUrl: `https://eshop.com/order/${sessionId}`,
+                        trackingUrl: `/order/${order.id}`,
                     }
                 );
 
@@ -599,6 +600,12 @@ export const getUserOrders = async (
     next: NextFunction
 ) => {
     try {
+        await sendLog({
+            type: "success",
+            message: `User orders retrieved ${req.user?.email}`,
+            source: "order-service",
+        });
+        
         const orders = await prisma.orders.findMany({
             where: {
                 userId: req.user.id,

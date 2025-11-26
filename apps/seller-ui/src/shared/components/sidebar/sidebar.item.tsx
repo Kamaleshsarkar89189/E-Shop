@@ -27,35 +27,42 @@
 
 import Link from 'next/link';
 import React from 'react';
-import { clsx } from 'clsx'; // A tiny utility for constructing className strings conditionally
+import { clsx } from 'clsx';
 
 interface Props {
     title: string;
     icon: React.ReactNode;
     isActive?: boolean;
-    href: string;
+    href?: string;       // href becomes optional
+    onClick?: () => void; // new onClick support
 }
 
-const SidebarItem = ({ icon, title, isActive, href }: Props) => {
-    return (
-        <Link
-            href={href}
-            // The clsx utility makes combining conditional classes very clean
-            className={clsx(
-                // Base classes for all states
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-300 transition-all duration-200',
-                {
-                    // Classes applied only when isActive is true
-                    'bg-sky-900 text-white scale-[.98] hover:!bg-[#0f3158d6]': isActive,
-                    // Classes applied only when isActive is false
-                    'hover:bg-gray-800': !isActive,
-                }
-            )}
-        >
-            {/* The icon will inherit the text color (e.g., text-white) from the parent Link */}
-            <div className="h-5 w-5">{icon}</div>
+const SidebarItem = ({ icon, title, isActive, href, onClick }: Props) => {
+    const baseClasses = clsx(
+        'flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-300 transition-all duration-200 w-full',
+        {
+            'bg-sky-900 text-white scale-[.98] hover:!bg-[#0f3158d6]': isActive,
+            'hover:bg-gray-800': !isActive,
+        }
+    );
 
-            {/* Using a <span> is more semantic here than a heading tag */}
+    // If onClick is provided → render a button instead of a Link
+    if (onClick) {
+        return (
+            <button
+                onClick={onClick}
+                className={baseClasses}
+            >
+                <div className="h-5 w-5">{icon}</div>
+                <span className="text-sm font-medium">{title}</span>
+            </button>
+        );
+    }
+
+    // Otherwise → normal navigation Link
+    return (
+        <Link href={href!} className={baseClasses}>
+            <div className="h-5 w-5">{icon}</div>
             <span className="text-sm font-medium">{title}</span>
         </Link>
     );

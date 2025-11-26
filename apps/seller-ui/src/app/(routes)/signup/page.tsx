@@ -140,7 +140,7 @@ const Signup = () => {
                         >
                             {step}
                         </div>
-                        <span className='ml-[-15px]'>
+                        <span className='ml-[-15px] text-white'>
                             {step === 1
                                 ? "Create Account"
                                 : step === 2

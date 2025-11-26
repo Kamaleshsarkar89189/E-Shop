@@ -2,7 +2,7 @@
 
 import useSeller from 'apps/seller-ui/src/hooks/useSeller';
 import useSidebar from 'apps/seller-ui/src/hooks/useSidebar';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import Box from '../box';
 import { Sidebar } from './sidebar.styles';
@@ -13,17 +13,30 @@ import DashboardIcon from 'apps/seller-ui/src/assets/icons/home';
 import SidebarMenu from './sidebar.menu';
 import { BellPlus, BellRing, CalendarPlus, ListOrdered, LogOut, Mail, PackageSearch, Settings, SquarePlus, TicketPercent } from 'lucide-react';
 import Payment from 'apps/seller-ui/src/assets/icons/payment';
+import axiosInstance from 'apps/seller-ui/src/utils/axiosInstance';
 
 const SidebarWrapper = () => {
     const { activeSidebar, setActiveSidebar } = useSidebar();
     const pathName = usePathname();
     const { seller } = useSeller();
+    const router = useRouter();
 
     useEffect(() => {
         setActiveSidebar(pathName);
     }, [pathName, setActiveSidebar])
 
     const getIconColor = (route: string) => activeSidebar === route ? "#0085ff" : "#969696"
+
+    const sellerLogoutHandler = async () => {
+        try {
+            await axiosInstance.post("/api/logout-seller");
+
+            router.push("/");
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+
 
     return (
         <Box
@@ -40,7 +53,7 @@ const SidebarWrapper = () => {
         >
             <Sidebar.Header>
                 <Box>
-                    <Link href={"/"} className='flex justify-center text-center gap-2'>
+                    <Link href={"/dashboard"} className='flex justify-center text-center gap-2'>
                         <Logo />
                         <Box>
                             <h3 className='text-xl font-medium text-[#ecedee]'>
@@ -149,7 +162,7 @@ const SidebarWrapper = () => {
                             <SidebarItem
                                 isActive={activeSidebar === "/dashboard/notifications"}
                                 title="Notifications"
-                                href="/notifications"
+                                href="/dashboard/notifications"
                                 icon={
                                     <BellRing
                                         size={24}
@@ -173,8 +186,8 @@ const SidebarWrapper = () => {
                             <SidebarItem
                                 isActive={activeSidebar === "/logout"}
                                 title="Logout"
-                                href="/"
                                 icon={<LogOut size={20} color={getIconColor("/logout")} />}
+                                onClick={sellerLogoutHandler}
                             />
                         </SidebarMenu>
                     </div>

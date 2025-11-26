@@ -6,10 +6,12 @@ export const updateUserAnalytics = async (event: any) => {
             where: {
                 userId: event.userId
             },
-            select: { actions: true }
+            select: { actions: true, recommendations: true, lastTrained: true }
         });
 
         let updatedActions: any = exisitingData?.actions || [];
+        let existingRecommendations = exisitingData?.recommendations || [];
+        let existingLastTrained = exisitingData?.lastTrained || null;
 
         const actionExists = updatedActions.some(
             (entry: any) =>
@@ -83,12 +85,16 @@ export const updateUserAnalytics = async (event: any) => {
             update: {
                 lastVisited: new Date(),
                 actions: updatedActions,
+                recommendations: existingRecommendations, 
+                lastTrained: existingLastTrained,
                 ...extraFields,
             },
             create: {
                 userId: event?.userId,
                 lastVisited: new Date(),
                 actions: updatedActions,
+                recommendations: [],
+                lastTrained: new Date(),
                 ...extraFields,
             },
         });

@@ -7,6 +7,7 @@ import { AuthError, NotFoundError, ValidationError } from "@packages/error-handl
 import { setCookie } from "../utils/cookies/setCookie";
 import JsonWebTokenError from "jsonwebtoken";
 import Stripe from "stripe";
+import { sendLog } from "@packages/utils/logs/send-logs";
 
 // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 //     apiVersion: "2025-07-30.basil",
@@ -141,6 +142,34 @@ export const loginUser = async (
     }
 };
 
+// Logout User
+export const logoutUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        // Clear both access and refresh cookies
+        res.clearCookie("access_token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        res.clearCookie("refresh_token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        return res.status(200).json({
+            message: "Logout successful!",
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
 // login admin
 export const loginAdmin = async (
     req: Request,
@@ -210,6 +239,34 @@ export const loginAdmin = async (
         res.status(200).json({
             message: "Login successful!",
             user: { id: user.id, email: user.email, name: user.name },
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+// Logout Admin
+export const logoutAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        // Clear admin cookies
+        res.clearCookie("access_token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        res.clearCookie("refresh_token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        return res.status(200).json({
+            message: "Admin logout successful!",
         });
     } catch (error) {
         return next(error);
@@ -356,7 +413,11 @@ export const refreshToken = async (
 export const getUser = async (req: any, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
-
+        await sendLog({
+            type: "success",
+            message: `User data retrieved ${user?.email}`,
+            source: "auth-service",
+        });
         res.status(200).json({
             success: true,
             user,
@@ -653,6 +714,35 @@ export const loginSeller = async (
     }
 };
 
+export const logoutSeller = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        // Clear seller access token
+        res.clearCookie("seller-access-token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        // Clear seller refresh token
+        res.clearCookie("seller-refresh-token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        return res.status(200).json({
+            message: "Seller logout successful!",
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+
 // Get logged in seller
 export const getSeller = async (
     req: any,
@@ -784,3 +874,20 @@ export const getUserAddresses = async (
     }
 };
 
+// fetch layout data
+export const getLayoutData = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const layout = await prisma.site_config.findFirst();
+
+        res.status(200).json({
+            success: true,
+            layout,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

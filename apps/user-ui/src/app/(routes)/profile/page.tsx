@@ -10,6 +10,7 @@ import OrdersTable from 'apps/user-ui/src/shared/components/tables/order-table';
 import axiosInstance from 'apps/user-ui/src/utils/axiosInstance';
 import { BadgeCheck, Bell, CheckCircle, Clock, Gift, Inbox, Loader2, Lock, LogOut, MapPin, Pencil, PhoneCall, Receipt, Settings, ShoppingBag, Truck, User } from 'lucide-react'
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 
@@ -47,9 +48,28 @@ const Page = () => {
     }, [activeTab]);
 
     const logOutHandler = async () => {
-        await axiosInstance.get("/api/logout-user").then((res) => {
+        try {
+            await axiosInstance.post("/api/logout-user");
+
             queryClient.invalidateQueries({ queryKey: ["user"] });
             router.push("/login");
+        } catch (err) {
+            console.error("Logout failed:", err);
+        }
+    };
+
+
+    const { data: notifications, isLoading: notificationsLoading } = useQuery({
+        queryKey: ["notifications"],
+        queryFn: async () => {
+            const res = await axiosInstance.get("/admin/api/get-user-notifications");
+            return res.data.notifications;
+        },
+    })
+
+    const markAsRead = async (notificationId: string) => {
+        await axiosInstance.post("/admin/api/mark-notification-as-read", {
+            notificationId,
         });
     };
 
@@ -67,7 +87,7 @@ const Page = () => {
                             )}
                         </span>{" "}
                         👋
-                    </h1>pchang
+                    </h1>
                 </div>
 
                 {/* Profile Overview Grid */}
@@ -170,7 +190,44 @@ const Page = () => {
                             <OrdersTable />
                         ) : activeTab === "Change Password" ? (
                             <ChangePassword />
-                        ) : <></>}
+                        ) : activeTab === "Notifications" ? (
+                            <div className='space-y-4 text-sm text-gray-700'>
+                                {!notificationsLoading && notifications?.length === 0 && (
+                                    <p>No Notifications available yet!</p>
+                                )}
+
+                                {!isLoading && notifications?.length > 0 && (
+                                    <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-white/40 backdrop-blur-lg shadow-sm">
+                                        {notifications.map((d: any) => (
+                                            <Link
+                                                key={d.id}
+                                                href={`${d.redirect_link}`}
+                                                className={`block px-5 py-4 transition ${d.read
+                                                    ? "hover:bg-gray-800/40"
+                                                    : "bg-gray-800/50 hover:bg-gray-800/70"
+                                                    }`}
+                                                onClick={() => markAsRead(d.id)}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white font-medium">{d.title}</span>
+                                                        <span className="text-gray-300 text-sm">{d.message}</span>
+                                                        <span className="text-gray-500 text-xs mt-1">
+                                                            {new Date(d.cratedAt).toLocaleString("en-UK", {
+                                                                dateStyle: "medium",
+                                                                timeStyle: "short",
+                                                            })}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <p>Not Found</p>
+                        )}
                     </div>
 
                     {/* Right Quick Panel */}

@@ -1,15 +1,15 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import BreadCrumbs from "apps/admin-ui/src/shared/components/breadcrumbs";
-import axiosInstance from "apps/admin-ui/src/utils/axiosInstance";
+import BreadCrumbs from "apps/seller-ui/src/shared/components/breadcrumbs";
+import axiosInstance from "apps/seller-ui/src/utils/axiosInstance";
 import Link from "next/link";
 import React from "react";
 
-const Notifications = () => {
+const Page = () => {
     const { data, isLoading } = useQuery({
         queryKey: ["notifications"],
         queryFn: async () => {
-            const res = await axiosInstance.get("/admin/api/get-all-notifications");
+            const res = await axiosInstance.get("/admin/api/seller-notifications");
             return res.data.notifications;
         },
     });
@@ -19,25 +19,24 @@ const Notifications = () => {
             notificationId,
         });
     };
-
+    
     return (
         <div className="w-full min-h-screen p-8">
             <h2 className="text-2xl text-white font-semibold mb-2">Notifications</h2>
             {/* Breadcrumbs */}
             <BreadCrumbs title="Notifications" />
-
             {!isLoading && data?.length === 0 && (
                 <p className="text-center pt-24 text-white text-sm font-Poppins">
                     No Notifications available yet!
                 </p>
-            )}
 
+            )}
             {!isLoading && data?.length > 0 && (
                 <div className="md:w-[80%] my-6 rounded-lg divide-y divide-gray-800 bg-black/40 backdrop-blur-lg shadow-sm">
                     {data.map((d: any) => (
                         <Link
                             key={d.id}
-                            href={`${d.redirect_link}`}
+                            href={d.redirect_link}
                             className={`block px-5 py-4 transition ${d.read
                                 ? "hover:bg-gray-800/40"
                                 : "bg-gray-800/50 hover:bg-gray-800/70"
@@ -64,4 +63,4 @@ const Notifications = () => {
     );
 };
 
-export default Notifications;
+export default Page;
