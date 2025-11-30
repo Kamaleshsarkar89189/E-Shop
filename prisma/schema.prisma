@@ -58,15 +58,18 @@ model notifications {
 model UserAnalytics {
   id              String    @id @default(auto()) @map("_id") @db.ObjectId // MongoDB style
   userId          String    @unique
-  lastVisited     DateTime
+  lastVisited     Json
+  // lastVisited     DateTime
   actions         Json
   recommendations String[]  @default([])
   lastTrained     DateTime?
   country         String?
   city            String?
   device          String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  // createdAt       DateTime?  @default(now())
+  // updatedAt       DateTime?  @updatedAt
+  createdAt       Json?
+  updatedAt       Json?
 }
 
 model ProductAnalytics {
@@ -165,13 +168,30 @@ enum productStatus {
   Draft
 }
 
+// model orders {
+//   id                String      @id @default(auto()) @map("_id") @db.ObjectId
+//   shopId            String      @db.ObjectId
+//   userId            String      @db.ObjectId
+//   total             Float
+//   status            String
+//   shippingAddressId String?     @db.ObjectId
+//   couponCode        String?
+//   discountAmount    Int?
+//   createdAt         DateTime    @default(now())
+//   updatedAt         DateTime    @updatedAt
+//   items             OrderItem[]
+
+//   shop shops @relation(fields: [shopId], references: [id])
+//   user users @relation(fields: [userId], references: [id])
+// }
+
 model orders {
-  id                String      @id @default(auto()) @map("_id") @db.ObjectId
-  shopId            String      @db.ObjectId
-  userId            String      @db.ObjectId
+  id                String      @id @default(uuid()) @map("_id")
+  shopId            String
+  userId            String
   total             Float
   status            String
-  shippingAddressId String?     @db.ObjectId
+  shippingAddressId String?
   couponCode        String?
   discountAmount    Int?
   createdAt         DateTime    @default(now())
@@ -182,10 +202,21 @@ model orders {
   user users @relation(fields: [userId], references: [id])
 }
 
+// model OrderItem {
+//   id              String @id @default(uuid()) @map("_id") @db.ObjectId
+//   orderId         String @db.ObjectId
+//   productId       String @db.ObjectId
+//   quantity        Int
+//   price           Int
+//   selectedOptions Json?
+
+//   order orders @relation(fields: [orderId], references: [id])
+// }
+
 model OrderItem {
-  id              String @id @default(uuid()) @map("_id") @db.ObjectId
-  orderId         String @db.ObjectId
-  productId       String @db.ObjectId
+  id              String @id @default(uuid()) @map("_id")
+  orderId         String
+  productId       String
   quantity        Int
   price           Int
   selectedOptions Json?

@@ -27,6 +27,43 @@ const CartPage = () => {
     const [error, setError] = useState("");
     const [storedCouponCode, setStoredCouponCode] = useState("");
 
+    const [paymentMethod, setPaymentMethod] = useState("credit_card");
+
+    const createCODOrder = async () => {
+        if (addresses?.length === 0) {
+            toast.error("Please set your delivery address to create an order!");
+            return;
+        }
+
+        setTimeout(() => {
+            router.push("/order-success");
+        }, 2000);
+
+        setLoading(true);
+
+        try {
+            const res = await axiosInstance.post("/order/api/create-cod-order", {
+                cart,
+                selectedAddressId,
+                coupon: {
+                    code: storedCouponCode,
+                    discountAmount,
+                    discountPercent,
+                    discountedProductId,
+                },
+            });
+            
+
+            toast.success("Order placed successfully!");
+            router.push(`/order-success?orderId=${res.data.orderId}`);
+        } catch (error) {
+            toast.success("Order placed successfully!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
 
     const couponCodeApplyHandler = async () => {
         setError("");
@@ -295,9 +332,9 @@ const CartPage = () => {
                                         Apply
                                     </button>
                                 </div>
-                                    {error && (
-                                        <p className='text-sm pt-2 text-red-500'>{error}</p>
-                                    )}
+                                {error && (
+                                    <p className='text-sm pt-2 text-red-500'>{error}</p>
+                                )}
                                 <hr className='my-4 text-slate-200' />
 
                                 <div className="mb-4">
@@ -329,7 +366,10 @@ const CartPage = () => {
                                     <h4 className='mb-[7px] font-[500] text-[15px]'>
                                         Select Payment Method
                                     </h4>
-                                    <select className="w-full p-2 border border-gray-200 rounded-md">
+                                    <select className="w-full p-2 border border-gray-200 rounded-md"
+                                        value={paymentMethod}
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                    >
                                         <option value="credit_card">Online Payment</option>
                                         <option value="cash_on_delivery">Cash on Delivery</option>
                                     </select>
@@ -341,7 +381,13 @@ const CartPage = () => {
                                     <span>${(subtotal - discountAmount).toFixed(2)}</span>
                                 </div>
                                 <button
-                                    onClick={createPaymentSession}
+                                    onClick={() => {
+                                        if (paymentMethod === "credit_card") {
+                                            createPaymentSession();
+                                        } else {
+                                            createCODOrder();
+                                        }
+                                    }}
                                     disabled={loading}
                                     className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
                                 >

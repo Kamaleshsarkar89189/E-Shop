@@ -27,7 +27,7 @@ export const createPaymentIntent = async (
     const customerAmount = Math.round(amount * 100);
     const platformFee = Math.floor(customerAmount * 0.1);
 
-    console.log(sellerStripeAccountId);
+    console.log("Seller Stripe ID",sellerStripeAccountId);
 
     try {
         const paymentIntent = await stripe.paymentIntents.create({
@@ -36,7 +36,8 @@ export const createPaymentIntent = async (
             payment_method_types: ["card"],
             application_fee_amount: platformFee,
             transfer_data: {
-                destination: "acct_1S7ex0PRvQdijfZr", // sellerStripeAccountId
+                // destination: "acct_1S7ex0PRvQdijfZr", // sellerStripeAccountId
+                destination: sellerStripeAccountId,
             },
             metadata: {
                 sessionId,
@@ -415,6 +416,201 @@ export const createOrder = async (
     }
 };
 
+// Create COD Order (No Stripe, Direct Order)
+export const createCODOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { cart, selectedAddressId, coupon } = req.body;
+        // @ts-ignore
+        const userId = req.user?.id; // assuming auth middleware injects user
+
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        if (!cart || cart.length === 0) {
+            return res.status(400).json({ message: "Cart is empty" });
+        }
+
+        // Find user info
+        const user = await prisma.users.findUnique({ where: { id: userId } });
+        const name = user?.name!;
+        const email = user?.email!;
+
+        // Group products by shop
+        const shopGrouped = cart.reduce((acc: any, item: any) => {
+            if (!acc[item.shopId]) acc[item.shopId] = [];
+            acc[item.shopId].push(item);
+            return acc;
+        }, {});
+
+        let createdOrders: any[] = [];
+
+        for (const shopId in shopGrouped) {
+            const orderItems = shopGrouped[shopId];
+
+            // Calculate total
+            let orderTotal = orderItems.reduce(
+                (sum: number, p: any) => sum + p.quantity * p.sale_price,
+                0
+            );
+
+            // Apply discount if applicable
+            if (
+                coupon &&
+                coupon.discountedProductId &&
+                orderItems.some((item: any) => item.id === coupon.discountedProductId)
+            ) {
+                const discountedItem = orderItems.find(
+                    (item: any) => item.id === coupon.discountedProductId
+                );
+
+                if (discountedItem) {
+                    const discount =
+                        coupon.discountPercent > 0
+                            ? (discountedItem.sale_price *
+                                discountedItem.quantity *
+                                coupon.discountPercent) /
+                            100
+                            : coupon.discountAmount;
+
+                    orderTotal -= discount;
+                }
+            }
+
+            // Create ORDER → COD status set as "Pending" or "Placed"
+            const order = await prisma.orders.create({
+                data: {
+                    userId,
+                    shopId,
+                    total: orderTotal,
+                    status: "Pending", // COD orders are pending
+                    // paymentMethod: "COD",
+                    shippingAddressId: selectedAddressId || null,
+                    couponCode: coupon?.code || null,
+                    discountAmount: coupon?.discountAmount || 0,
+                    items: {
+                        create: orderItems.map((item: any) => ({
+                            productId: item.id,
+                            quantity: item.quantity,
+                            price: item.sale_price,
+                            selectedOptions: item.selectedOptions,
+                        })),
+                    },
+                },
+            });
+
+            createdOrders.push(order);
+
+            // Update stock & analytics
+            for (const item of orderItems) {
+                const { id: productId, quantity } = item;
+
+                await prisma.products.update({
+                    where: { id: productId },
+                    data: {
+                        stock: { decrement: quantity },
+                        totalSales: { increment: quantity },
+                    },
+                });
+
+                // Product analytics
+                await prisma.productAnalytics.upsert({
+                    where: { productId },
+                    create: {
+                        productId,
+                        shopId,
+                        purchases: quantity,
+                        lastViewedAt: new Date(),
+                    },
+                    update: {
+                        purchases: { increment: quantity },
+                    },
+                });
+
+                // User analytics
+                const existingAnalytics = await prisma.userAnalytics.findUnique({
+                    where: { userId },
+                });
+
+                const newAction = {
+                    productId,
+                    shopId,
+                    action: "purchase",
+                    timestamp: Date.now(),
+                };
+
+                const currentActions = Array.isArray(existingAnalytics?.actions)
+                    ? existingAnalytics.actions
+                    : [];
+
+                if (existingAnalytics) {
+                    await prisma.userAnalytics.update({
+                        where: { userId },
+                        data: {
+                            lastVisited: new Date(),
+                            actions: [...currentActions, newAction],
+                        },
+                    });
+                } else {
+                    await prisma.userAnalytics.create({
+                        data: {
+                            userId,
+                            lastVisited: new Date(),
+                            actions: [newAction],
+                        },
+                    });
+                }
+            }
+
+            // Send email
+            await sendEmail(
+                email,
+                "🛍️ Your COD Order Confirmation",
+                "order-confirmation",
+                {
+                    name,
+                    cart,
+                    totalAmount: orderTotal,
+                    trackingUrl: `/order/${order.id}`,
+                }
+            );
+
+            // Notify seller
+            const firstProduct = orderItems[0];
+            await prisma.notifications.create({
+                data: {
+                    title: "🛒 New COD Order Received",
+                    message: `A customer ordered ${firstProduct?.title || "an item"} from your shop.`,
+                    creatorId: userId,
+                    receiverId: firstProduct.sellerId,
+                    redirect_link: `https://eshop.com/order/${order.id}`,
+                },
+            });
+        }
+
+        // Admin notification
+        await prisma.notifications.create({
+            data: {
+                title: "📦 New COD Order",
+                message: `${name} placed a cash-on-delivery order.`,
+                creatorId: userId,
+                receiverId: "admin",
+                redirect_link: `/admin/orders`,
+            },
+        });
+
+        return res.status(201).json({
+            message: "COD Order placed successfully!",
+            orders: createdOrders,
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
 
 // get sellers orders
 export const getSellerOrders = async (
