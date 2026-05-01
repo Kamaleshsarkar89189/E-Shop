@@ -2,12 +2,12 @@ import { Eye, Heart, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
 import Ratings from '../ratings';
-import ProductDetailsCard from './product-details-card';
 import { useStore } from 'apps/user-ui/src/store';
 import useUser from 'apps/user-ui/src/hooks/useUser';
 import useLocationTracking from 'apps/user-ui/src/hooks/useLocationTracking';
 import useDeviceTracking from 'apps/user-ui/src/hooks/useDeviceTracking';
 import Image from 'next/image';
+import ProductDetailsCard from './product-details-card';
 
 const ProductCard = ({ product, isEvent }: { product: any; isEvent?: boolean }) => {
 

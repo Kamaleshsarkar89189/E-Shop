@@ -1,6 +1,6 @@
 import { Pencil, WandSparkles, X } from 'lucide-react';
 import Image from 'next/image';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const ImagePlaceHolder = ({
   size,
@@ -27,6 +27,12 @@ const ImagePlaceHolder = ({
 }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(defaultImage);
 
+  useEffect(() => {
+    if (images && images[index]?.file_url) {
+      setImagePreview(images[index].file_url);
+    }
+  }, [images, index]);
+  
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {

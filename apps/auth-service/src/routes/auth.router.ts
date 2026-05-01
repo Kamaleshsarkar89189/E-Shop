@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { addUserAddress, createShop, createStripeConnectLink, deleteUserAddress, getAdmin, getLayoutData, getSeller, getUser, getUserAddresses, loginAdmin, loginSeller, loginUser, logoutAdmin, logoutSeller, logoutUser, refreshToken, registerSeller, resetUserPassword, updateUserPassword, userForgotPassword, userRegistration, verifySeller, verifyUser, verifyUserForgotPassword } from "../controllers/auth.controller";
+import { addUserAddress, createShop, createStripeConnectLink, deleteUserAddress, getAdmin, getLayoutData, getSeller, getUser, getUserAddresses, loginAdmin, loginSeller, loginUser, logoutAdmin, logoutSeller, logoutUser, refreshToken, registerSeller, resetSellerPassword, resetUserPassword, sellerForgotPassword, updateUserPassword, userForgotPassword, userRegistration, verifySeller, verifySellerForgotPassword, verifyUser, verifyUserForgotPassword } from "../controllers/auth.controller";
 import isAuthenticated from "@packages/middleware/isAuthenticated";
 import { isSeller } from "@packages/middleware/authorizeRoles";
 
@@ -12,6 +12,9 @@ router.get("/logged-in-user", isAuthenticated, getUser);
 router.post("/forgot-password-user", userForgotPassword);
 router.post("/reset-password-user", resetUserPassword);
 router.post("/verify-forgot-password-user", verifyUserForgotPassword);
+router.post("/forgot-password-seller", sellerForgotPassword);
+router.post("/reset-password-seller", resetSellerPassword);
+router.post("/verify-forgot-password-seller", verifySellerForgotPassword);
 router.post("/seller-registration", registerSeller);
 router.post("/verify-seller", verifySeller);
 router.post("/create-shop", createShop);

@@ -6,6 +6,6 @@ import Redis from "ioredis";
 //   password: process.env.REDIS_PASSWORD,
 // });
 
-const redis = new Redis("rediss://default:AS4SAAIjcDE3ZTI0N2IyYjZmMGQ0N2EyODM2ODNlYTkwMzRlYzNhOHAxMA@measured-sole-11794.upstash.io:6379")
+const redis = new Redis("rediss://default:gQAAAAAAAVmaAAIncDI5ZWJlNjlkMDdlYTI0NWMwOWJhMmJjYTRlNDg4YmI1M3AyODg0NzQ@flying-ewe-88474.upstash.io:6379")
 
 export default redis;

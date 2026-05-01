@@ -504,6 +504,9 @@ export const getAllEvents = async (
             prisma.products.findMany({
                 skip,
                 where: baseFilter,
+                include: {
+                    images: true,
+                },
                 take: limit,
                 orderBy: { starting_date: "asc" }, // or whatever order you want
             }),
@@ -514,6 +517,9 @@ export const getAllEvents = async (
 
             prisma.products.findMany({
                 where: baseFilter,
+                include: {
+                    images: true,
+                },
                 take: 10,
                 orderBy: { totalSales: "desc" },
             }),
@@ -557,6 +563,60 @@ export const getProductDetails = async (
         return next(error);
     }
 }
+
+export const getShopProductsWithDates = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { shopId } = req.params;
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+
+        const skip = (page - 1) * limit;
+
+        const products = await prisma.products.findMany({
+            where: {
+                shopId,
+                starting_date: { not: null },
+                ending_date: { not: null },
+                isDeleted: false,
+            },
+            include: {
+                images: true,
+                Shop: true,
+            },
+            skip,
+            take: limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        const total = await prisma.products.count({
+            where: {
+                shopId,
+                starting_date: { not: null },
+                ending_date: { not: null },
+                isDeleted: false,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            products,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 // get filtered products
 export const getFilteredProducts = async (
@@ -965,5 +1025,352 @@ export const getShopById = async (req: Request, res: Response, next: NextFunctio
     } catch (error) {
         console.error("Error fetching shop:", error);
         next(error);
+    }
+};
+
+export const getSellerProducts = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { shopId } = req.params;
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+
+        const skip = (page - 1) * limit;
+
+        // Fetch products of specific shop only
+        const products = await prisma.products.findMany({
+            where: {
+                shopId: shopId, // 🔥 filter by shop
+            },
+            include: {
+                images: true,
+            },
+            skip,
+            take: limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        // Optional: total count for pagination
+        const totalProducts = await prisma.products.count({
+            where: {
+                shopId: shopId,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            products,
+            pagination: {
+                total: totalProducts,
+                page,
+                limit,
+                totalPages: Math.ceil(totalProducts / limit),
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// export const isFollowingShop = async (
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+// ) => {
+//     try {
+//         const { shopId } = req.params;
+//         const { userId } = req.query;
+
+//         if (!shopId || !userId) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "shopId and userId are required",
+//             });
+//         }
+
+//         const follow = await prisma.shopFollowers.findFirst({
+//             where: {
+//                 shopId: shopId as string,
+//                 userId: userId as string,
+//             },
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             isFollowing: !!follow,
+//         });
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
+export const isFollowingShop = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { shopId } = req.params;
+
+        if (!shopId) {
+            return res.status(400).json({
+                success: false,
+                message: "shopId is required",
+            });
+        }
+
+        const followersCount = await prisma.shopFollowers.count({
+            where: {
+                shopId,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            isFollowing: followersCount > 0,
+            followersCount,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const followShop = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { shopId, userId } = req.body;
+
+        if (!shopId || !userId) {
+            return res.status(400).json({
+                success: false,
+                message: "shopId and userId are required",
+            });
+        }
+
+        // Prevent duplicate follow
+        const existingFollow = await prisma.shopFollowers.findFirst({
+            where: {
+                shopId,
+                userId,
+            },
+        });
+
+        if (existingFollow) {
+            return res.status(409).json({
+                success: false,
+                message: "Shop already followed",
+            });
+        }
+
+        await prisma.shopFollowers.create({
+            data: {
+                shopId,
+                userId,
+            },
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Shop followed successfully",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const unfollowShop = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { shopId, userId } = req.body;
+
+        if (!shopId || !userId) {
+            return res.status(400).json({
+                success: false,
+                message: "shopId and userId are required",
+            });
+        }
+
+        await prisma.shopFollowers.deleteMany({
+            where: {
+                shopId,
+                userId,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Shop unfollowed successfully",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+// @ts-ignore
+export const getShopProfile = async (req, res, next) => {
+    try {
+        const { sellerId } = req.params;
+
+        if (!sellerId) {
+            return res.status(400).json({
+                success: false,
+                message: "sellerId is required",
+            });
+        }
+
+        const shop = await prisma.shops.findUnique({
+            where: { sellerId },
+            include: {
+                products: true,
+                // followers: true,
+                reviews: true,
+            },
+        });
+
+        if (!shop) {
+            return res.status(404).json({
+                success: false,
+                message: "Shop not found",
+            });
+        }
+
+        res.status(200).json({ success: true, shop });
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const updateProduct = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        const existingProduct = await prisma.products.findUnique({
+            where: { slug: id },
+        });
+
+        if (!existingProduct) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const {
+            title,
+            short_description,
+            tags,
+            warranty,
+            slug,
+            brand,
+            category,
+            subCategory,
+            detailed_description,
+            video_url,
+            regular_price,
+            sale_price,
+            stock,
+            cash_on_delivery,
+            colors,
+            sizes,
+            specifications,
+            properties,
+            discountCodes,
+            images = [],
+        } = req.body;
+
+        // 🔥 STEP 1: delete old images
+        // await prisma.productImages.deleteMany({
+        //     where: { productId: id },
+        // });
+
+        // 🔥 STEP 2: update product + recreate images
+        const updatedProduct = await prisma.products.update({
+            where: { slug: id },
+            data: {
+                title,
+                short_description,
+                tags,
+                warranty,
+                slug,
+                brand,
+                category,
+                subCategory,
+                detailed_description,
+                video_url,
+                regular_price: Number(regular_price),
+                sale_price: Number(sale_price),
+                stock: Number(stock),
+                cashOnDelivery: cash_on_delivery,
+                colors,
+                sizes,
+                custom_specifications: specifications,
+                custom_properties: properties,
+                discount_codes: discountCodes,
+
+                // ✅ FIXED IMAGES
+                images: {
+                    create: images
+                        .filter((img: any) => img && img.fileId && img.file_url)
+                        .map((img: any) => ({
+                            file_id: img.fileId,
+                            url: img.file_url,
+                        })),
+                },
+            },
+            include: { images: true },
+        });
+
+        return res.status(200).json({
+            message: 'Product updated successfully',
+            product: updatedProduct,
+        });
+    } catch (error: any) {
+        return res.status(500).json({
+            message: 'Failed to update product',
+            error: error.message,
+        });
+    }
+};
+
+export const getProductById = async (
+    req: any,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { id } = req.params;
+
+        const product = await prisma.products.findFirst({
+            where: {
+                id: id,
+                shopId: req?.seller?.shop?.id, // 🔒 ensure seller can only access their own product
+            },
+            include: {
+                images: true,
+            },
+        });
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            product,
+        });
+    } catch (error) {
+        return next(error);
     }
 };

@@ -55,3 +55,5 @@ export const consumeKafkaMessages = async () => {
 };
 
 consumeKafkaMessages().catch(console.error)
+
+// topics used: chat.new_message, logs, users-events

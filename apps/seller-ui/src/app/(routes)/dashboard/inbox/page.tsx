@@ -192,7 +192,7 @@ const ChatPage = () => {
       <div className="flex h-screen shadow-inner overflow-hidden bg-gray-950 text-...">
         {/* Sidebar */}
         <div className="w-[320px] border-r border-gray-800 bg-gray-950">
-          <div className="p-4 border-b border-gray-800 text-lg font-semibold">
+          <div className="p-4 border-b border-gray-800 text- text-white font-semibold">
             Messages
           </div>
           <div className="divide-y divide-gray-900">
@@ -220,7 +220,7 @@ const ChatPage = () => {
                       <Image
                         src={
                           chat.user?.avatar ||
-                          "https://ik.imagekit.io/shahriarbecodemy/avatar/6_t8b5y8t3U..."
+                          "https://ik.imagekit.io/kamaleshsarkar/products/product-1758392401303_ngI1a_Fom.jpg"
                         }
                         // alt={chat.user?.name || "User avatar"}
                         alt={chat?.user?.avatar || "User avatar"}
@@ -264,7 +264,7 @@ const ChatPage = () => {
               {/* Header */}
               <div className="p-4 border-b border-gray-800 bg-gray-900 flex items-c...">
                 <Image
-                  src={selectedChat?.user?.avatar || ""}
+                  src={selectedChat?.user?.avatar || "https://ik.imagekit.io/kamaleshsarkar/products/product-1758392401303_ngI1a_Fom.jpg"}
                   alt={selectedChat?.user?.name || "User name"}
                   width={40}
                   height={40}
@@ -274,7 +274,7 @@ const ChatPage = () => {
                   <h2 className="text-white font-semibold text-base">
                     {selectedChat.user?.name}{" "}
                   </h2>
-                  <p>
+                  <p className="text-white">
                     {selectedChat.user?.online ? "Online" : "Offline"}
                   </p>
                 </div>

@@ -1,7 +1,6 @@
 import SellerProfile from 'apps/user-ui/src/shared/modules/seller/seller-profile';
 import axiosInstance from 'apps/user-ui/src/utils/axiosInstance';
 import { Metadata } from 'next';
-import { stringify } from 'querystring';
 import React from 'react'
 
 async function fetchSellerDetails(id: string) {
@@ -48,7 +47,6 @@ export async function generateMetadata(
 }
 const Page = async ({ params }: { params: { id: string } }) => {
   const data = await fetchSellerDetails(params.id);
-//   console.log("Data", JSON.stringify(data))
 
   return (
     <div>

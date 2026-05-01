@@ -16,7 +16,8 @@ import {
 } from "recharts";
 import GeographicalMap from "apps/seller-ui/src/shared/components/charts/geographicalMap";
 import SalesChart from "apps/seller-ui/src/shared/components/charts/sale-chart";
-// import SalesChart from "../../shared/components/charts/sale-chart";
+import axiosInstance from "apps/seller-ui/src/utils/axiosInstance";
+import { useQuery } from "@tanstack/react-query";
 
 // Device data
 const deviceData = [
@@ -26,15 +27,22 @@ const deviceData = [
 ];
 const COLORS = ["#4ade80", "#facc15", "#60a5fa"];
 
+
+// get seller orders
+const fetchOrders = async () => {
+  const res = await axiosInstance.get("/order/api/get-seller-orders");
+  return res.data.orders;
+};
+
 // Orders data
-const orders = [
-  { id: "ORD-001", customer: "John Doe", amount: "$250", status: "Paid" },
-  { id: "ORD-002", customer: "Jane Smith", amount: "$180", status: "Pending" },
-  { id: "ORD-003", customer: "Alice Johnson", amount: "$340", status: "Paid" },
-  { id: "ORD-004", customer: "Bob Lee", amount: "$90", status: "Failed" },
-  { id: "ORD-005", customer: "Bob Lee", amount: "$90", status: "Failed" },
-  { id: "ORD-006", customer: "Bob Lee", amount: "$90", status: "Failed" },
-];
+// const orders = [
+//   { id: "ORD-001", customer: "John Doe", amount: "$250", status: "Paid" },
+//   { id: "ORD-002", customer: "Jane Smith", amount: "$180", status: "Pending" },
+//   { id: "ORD-003", customer: "Alice Johnson", amount: "$340", status: "Paid" },
+//   { id: "ORD-004", customer: "Bob Lee", amount: "$90", status: "Failed" },
+//   { id: "ORD-005", customer: "Bob Lee", amount: "$90", status: "Failed" },
+//   { id: "ORD-006", customer: "Bob Lee", amount: "$90", status: "Failed" },
+// ];
 
 // Orders table columns
 const columns = [
@@ -67,11 +75,44 @@ const columns = [
 ];
 
 const OrdersTable = () => {
+  // const table = useReactTable({
+  //   data: orders,
+  //   columns,
+  //   getCoreRowModel: getCoreRowModel(),
+  // });
+
+  const { data: formattedOrders = [], isLoading, isError } = useQuery({
+    queryKey: ["seller-orders", "latest-7"],
+    queryFn: fetchOrders,
+    select: (orders: any[]) =>
+      orders
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        )
+        .slice(0, 7)
+        .map((order) => ({
+          id: order.id,
+          customer: order.user?.name ?? "N/A",
+          amount: `₹${order.total}`,
+          status: order.status,
+        })),
+  });
+
   const table = useReactTable({
-    data: orders,
+    data: formattedOrders,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (isLoading) {
+    return <p className="text-white">Loading orders...</p>;
+  }
+
+  if (isError) {
+    return <p className="text-red-500">Failed to load orders</p>;
+  }
 
   return (
     <div className="mt-6">

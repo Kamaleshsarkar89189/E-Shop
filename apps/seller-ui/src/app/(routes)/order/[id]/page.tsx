@@ -6,12 +6,20 @@ import axiosInstance from "apps/seller-ui/src/utils/axiosInstance";
 import { useParams, useRouter } from "next/navigation";
 
 const statuses = [
-    "Ordered",
-    "Packed",
-    "Shipped",
-    "Out for Delivery",
-    "Delivered",
+    "PROCESSING",
+    "SHIPPED",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+    "CANCELLED",
 ];
+
+const statusLabels: Record<string, string> = {
+  PROCESSING: "Processing",
+  SHIPPED: "Shipped",
+  OUT_FOR_DELIVERY: "Out for Delivery",
+  DELIVERED: "Delivered",
+  CANCELLED: "Cancelled",
+};
 
 const Page = () => {
     const params = useParams();
@@ -91,7 +99,7 @@ const Page = () => {
                 <label className="text-sm font-medium text-gray-300 mr-3">
                     Update Delivery Status:
                 </label>
-                <select
+                {/* <select
                     value={order.deliveryStatus}
                     onChange={handleStatusChange}
                     disabled={updating}
@@ -111,6 +119,19 @@ const Page = () => {
                             </option>
                         );
                     })}
+                </select> */}
+
+                <select
+                    value={order.deliveryStatus}
+                    onChange={handleStatusChange}
+                    disabled={updating}
+                    className="border bg-transparent text-gray-200 border-gray-300 rounded-m"
+                >
+                    {statuses.map((status) => (
+                        <option key={status} value={status}>
+                            {statusLabels[status]}
+                        </option>
+                    ))}
                 </select>
             </div>
 

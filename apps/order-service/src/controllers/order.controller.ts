@@ -27,7 +27,7 @@ export const createPaymentIntent = async (
     const customerAmount = Math.round(amount * 100);
     const platformFee = Math.floor(customerAmount * 0.1);
 
-    console.log("Seller Stripe ID",sellerStripeAccountId);
+    console.log("Seller Stripe ID", sellerStripeAccountId);
 
     try {
         const paymentIntent = await stripe.paymentIntents.create({
@@ -801,7 +801,7 @@ export const getUserOrders = async (
             message: `User orders retrieved ${req.user?.email}`,
             source: "order-service",
         });
-        
+
         const orders = await prisma.orders.findMany({
             where: {
                 userId: req.user.id,
@@ -843,5 +843,48 @@ export const getAdminOrders = async (req: Request, res: Response, next: NextFunc
 
     } catch (error) {
         next(error);
+    }
+};
+
+
+const validStatuses = [
+    "PROCESSING",
+    "SHIPPED",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+    "CANCELLED",
+];
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+    const { orderId } = req.params;
+    const { deliveryStatus } = req.body;
+
+    try {
+        // ✅ Validate ENUM value
+        if (!validStatuses.includes(deliveryStatus)) {
+            return res.status(400).json({
+                message: "Invalid delivery status",
+            });
+        }
+
+        // ✅ Update order
+        const updatedOrder = await prisma.orders.update({
+            where: { id: orderId },
+            data: {
+                deliveryStatus,
+            },
+        });
+
+        return res.status(200).json({
+            message: "Delivery status updated successfully",
+            order: updatedOrder,
+        });
+
+    } catch (error) {
+        console.error("Error updating order status:", error);
+
+        return res.status(500).json({
+            message: "Internal server error",
+        });
     }
 };

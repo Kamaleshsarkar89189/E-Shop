@@ -197,9 +197,18 @@ model orders {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   items             OrderItem[]
+  deliveryStatus DeliveryStatus @default(PROCESSING)
 
   shop shops @relation(fields: [shopId], references: [id])
   user users @relation(fields: [userId], references: [id])
+}
+
+enum DeliveryStatus {
+  PROCESSING
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
 }
 
 // model OrderItem {

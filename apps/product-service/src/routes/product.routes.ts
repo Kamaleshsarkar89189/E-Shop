@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { createDiscountCodes, createProduct, deleteDiscountCode, deleteProduct, deleteProductImage, getAllEvents, getAllProducts, getCategories, getDiscountCodes, getFilteredEvents, getFilteredProducts, getFilteredShops, getProductDetails, getShopById, getShopProducts, restoreProduct, searchProducts, topShops, uploadProductImage } from "../controllers/product.controller";
+import { createDiscountCodes, createProduct, deleteDiscountCode, deleteProduct, deleteProductImage, followShop, getAllEvents, getAllProducts, getCategories, getDiscountCodes, getFilteredEvents, getFilteredProducts, getFilteredShops, getProductById, getProductDetails, getSellerProducts, getShopById, getShopProducts, getShopProductsWithDates, getShopProfile, isFollowingShop, restoreProduct, searchProducts, topShops, unfollowShop, updateProduct, uploadProductImage } from "../controllers/product.controller";
 import isAuthenticated from "packages/middleware/isAuthenticated";
 
 const router: Router = express.Router();
@@ -23,6 +23,23 @@ router.get("/get-filtered-shops", getFilteredShops);
 router.get("/search-products", searchProducts);
 router.get("/top-shops", topShops);
 router.get("/get-shop/:id", getShopById);
+router.get(
+    "/get-seller-products/:shopId",
+    getSellerProducts
+);
+router.get(
+    "/get-seller-events/:shopId",
+    getShopProductsWithDates
+);
+router.get(
+    "/is-following/:shopId",
+    isFollowingShop
+);
+router.post("/follow-shop", followShop);
+router.post("/unfollow-shop", unfollowShop);
+router.get("/shop-profile/:sellerId", getShopProfile);
 
+router.put('/update-product/:id', updateProduct);
+router.get('/get-product/:id', getProductById);
 
 export default router;

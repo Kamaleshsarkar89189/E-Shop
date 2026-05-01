@@ -212,13 +212,23 @@ const CartPage = () => {
                                         className="border-b border-b-[#0000000e]"
                                     >
                                         <td className="flex items-center gap-4 p-4">
-                                            <Image
-                                                src={item?.images[0]?.url}
+                                            {/* <Image
+                                                src={item?.images?.[0]?.url}
                                                 alt={item.title}
                                                 width={80}
                                                 height={80}
                                                 className="rounded"
+                                            /> */}
+                                            <Image
+                                                src={
+                                                    item?.images?.[0]?.url ??
+                                                    "https://images.unsplash.com/photo-1523275335684-37898b6baf30"
+                                                }
+                                                alt={item?.title ?? "Product"}
+                                                width={80}
+                                                height={80}
                                             />
+
                                             <div className='flex flex-col'>
                                                 <span className='font-medium'>{item.title}</span>
                                                 {item?.selectedOptions && (

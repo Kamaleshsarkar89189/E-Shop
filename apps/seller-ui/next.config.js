@@ -9,12 +9,23 @@ const { composePlugins, withNx } = require('@nx/next');
 const nextConfig = {
   // Use this to set Nx-specific options
   // See: https://nx.dev/recipes/next/next-config-setup
+  experimental: {
+    allowedDevOrigins: [
+      "http://192.168.1.199:3001",
+      "http://localhost:3000",
+    ],
+  },
   nx: {},
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "ik.imagekit.io",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
         pathname: "/**",
       },
     ],

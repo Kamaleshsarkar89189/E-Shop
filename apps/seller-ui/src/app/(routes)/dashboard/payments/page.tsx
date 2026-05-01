@@ -95,7 +95,7 @@ const SellerPayments = () => {
                 header: "Actions",
                 cell: ({ row }: any) => (
                     <Link
-                        href={`order/${row.original.id}`}
+                        href={`/order/${row.original.id}`}
                         className="text-blue-400 hover:to-blue-300 transition"
                     >
                         <Eye size={18} />

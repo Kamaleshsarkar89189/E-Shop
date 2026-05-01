@@ -47,7 +47,7 @@ const ForgotPassword = () => {
         mutationFn: async ({ email }: { email: string }) => {
             console.log("Requesting OTP for email:", email);
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_SERVER_URI}/api/forgot-password-user`,
+                `${process.env.NEXT_PUBLIC_SERVER_URI}/api/forgot-password-seller`,
                 { email }
             );
             return response.data;
@@ -73,7 +73,7 @@ const ForgotPassword = () => {
             const otpString = otp.join("");
             console.log("Verifying OTP:", { email: userEmail, otp: otpString });
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_SERVER_URI}/api/verify-forgot-password-user`,
+                `${process.env.NEXT_PUBLIC_SERVER_URI}/api/verify-forgot-password-seller`,
                 { email: userEmail, otp: otpString }
             );
             return response.data;
@@ -95,7 +95,7 @@ const ForgotPassword = () => {
             if (!password) return;
             console.log("Resetting password for email:", userEmail);
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_SERVER_URI}/api/reset-password-user`,
+                `${process.env.NEXT_PUBLIC_SERVER_URI}/api/reset-password-seller`,
                 { email: userEmail, newPassword: password }
             )
             return response.data;
@@ -240,8 +240,14 @@ const ForgotPassword = () => {
 
                             {canResend ? (
                                 <button
-                                    onClick={() => requestOtpMutation.mutate({ email: userEmail! })}
-                                    className='text-blue text-center mt-4 cursor-pointer'
+                                    // onClick={() => requestOtpMutation.mutate({ email: userEmail! })}
+                                    // className='text-blue text-center mt-4 cursor-pointer'
+                                    onClick={() => {
+                                        setTimer(60);
+                                        setCanResend(false);
+                                        requestOtpMutation.mutate({ email: userEmail! });
+                                        startResendTimer();
+                                    }}
                                 >
                                     Resend OTP
                                 </button>

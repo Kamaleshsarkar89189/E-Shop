@@ -102,6 +102,7 @@
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.1",
     "ua-parser-js": "^2.0.4",
+    "ws": "^8.19.0",
     "zustand": "^5.0.8"
   }
 }

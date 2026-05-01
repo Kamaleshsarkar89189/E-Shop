@@ -485,6 +485,80 @@ export const resetUserPassword = async (
     }
 };
 
+// Seller forgot password
+export const sellerForgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    await handleForgotPassword(req, res, next, "seller");
+};
+
+// Verify forgot password OTP (same function works)
+export const verifySellerForgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    await verifyForgotPasswordOtp(req, res, next);
+};
+
+export const resetSellerPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const { email, newPassword } = req.body;
+
+        // ✅ Validation
+        if (!email || !newPassword) {
+            return next(
+                new ValidationError("Email and new password are required!")
+            );
+        }
+
+        // ✅ Find seller
+        const seller = await prisma.sellers.findUnique({
+            where: { email },
+        });
+
+        if (!seller) {
+            return next(new ValidationError("Seller not found!"));
+        }
+
+        // ✅ Compare with old password
+        const isSamePassword = await bcrypt.compare(
+            newPassword,
+            seller.password!
+        );
+
+        if (isSamePassword) {
+            return next(
+                new ValidationError(
+                    "New password cannot be the same as the old password!"
+                )
+            );
+        }
+
+        // ✅ Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // ✅ Update password
+        await prisma.sellers.update({
+            where: { email },
+            data: { password: hashedPassword },
+        });
+
+        res.status(200).json({
+            message: "Seller password reset successfully!",
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 // register a new seller
 export const registerSeller = async (
     req: Request,

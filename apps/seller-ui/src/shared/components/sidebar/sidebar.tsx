@@ -11,7 +11,7 @@ import Logo from 'apps/seller-ui/src/assets/svgs/logo';
 import SidebarItem from './sidebar.item';
 import DashboardIcon from 'apps/seller-ui/src/assets/icons/home';
 import SidebarMenu from './sidebar.menu';
-import { BellPlus, BellRing, CalendarPlus, ListOrdered, LogOut, Mail, PackageSearch, Settings, SquarePlus, TicketPercent } from 'lucide-react';
+import { BellPlus, BellRing, CalendarPlus, ListOrdered, LogOut, Mail, PackageSearch, Settings, SquarePlus, TicketPercent, UserIcon } from 'lucide-react';
 import Payment from 'apps/seller-ui/src/assets/icons/payment';
 import axiosInstance from 'apps/seller-ui/src/utils/axiosInstance';
 
@@ -169,6 +169,12 @@ const SidebarWrapper = () => {
                                         color={getIconColor("/dashboard/notifications")}
                                     />
                                 }
+                            />
+                            <SidebarItem
+                                title="Profile"
+                                icon={<UserIcon fill={getIconColor("/profile")} />}
+                                isActive={activeSidebar === "/dashboard/profile"}
+                                href="/dashboard/profile"
                             />
                         </SidebarMenu>
                         <SidebarMenu title="Extras">

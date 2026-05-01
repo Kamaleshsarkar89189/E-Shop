@@ -35,8 +35,7 @@ const Hero = () => {
                 <div className="md:w-1/2 flex justify-center">
                     <Image
                         src={
-                            layout?.banner ||
-                            "https://ik.imagekit.io/fz0xzwtey/products/slider-img-1.png"
+                            layout?.banner
                         }
                         alt=""
                         width={450}

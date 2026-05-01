@@ -45,20 +45,34 @@ const Header = () => {
     return (
         <div className="w-full bg-white">
             <div className="w-[80%] py-5 m-auto flex items-center justify-between">
-                <div>
+                {/* <div>
                     <Link href={"/"}>
                         <Image
                             src={
-                                layout?.logo ||
-                                "https://ik.imagekit.io/kamaleshsarkar/products/product-1763883583848_egwXeQ0z_.jpg?updatedAt=1763883589767"
+                                layout?.logo
                             }
-                            width={300}
+                            width={150}
                             height={100}
-                            alt=""
+                            alt="Logo"
                             className="h-[70px] ml-[-50px] mb-[-30px] object-cover"
                         />
                     </Link>
+                </div> */}
+                <div>
+                    <Link href="/">
+                        {layout?.logo && (
+                            <Image
+                                src={layout.logo}
+                                width={150}
+                                height={100}
+                                alt="Logo"
+                                className="h-[70px] ml-[-50px] mb-[-30px] object-cover"
+                                priority
+                            />
+                        )}
+                    </Link>
                 </div>
+
 
                 {/* Search Input */}
                 <div className="w-[50%] relative">

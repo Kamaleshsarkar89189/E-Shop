@@ -11,6 +11,11 @@ const RichTextEditor = ({
 }) => {
     const [editorValue, setEditorValue] = useState(value || ""); // Single state
     const quillRef = useRef(false);
+    
+    // ✅ FIX: sync API value with editor
+    useEffect(() => {
+        setEditorValue(value || "");
+    }, [value]);
 
     useEffect(() => {
         quillRef.current = true; // Mark as mounted

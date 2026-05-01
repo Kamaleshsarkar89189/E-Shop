@@ -223,7 +223,7 @@ const Page = () => {
                                                 <Image
                                                     src={
                                                         chat.seller?.avatar ||
-                                                        "https://ik.imagekit.io/shahriarbecodemy/avatar/6_t8b5y8t3l"
+                                                        "https://ik.imagekit.io/kamaleshsarkar/products/product-1758392401303_ngI1a_Fom.jpg"
                                                     }
                                                     alt={chat.seller?.name}
                                                     width={36}
@@ -264,7 +264,7 @@ const Page = () => {
                             <>
                                 <div className="p-4 border-b border-b-gray-200 bg-white flex items-center gap-3">
                                     <Image
-                                        src={selectedChat.seller?.avatar || "https://ik.imagekit.io/kamaleshsarkar/products/product-1758392401303_n"}
+                                        src={selectedChat.seller?.avatar || "https://ik.imagekit.io/kamaleshsarkar/products/product-1758392401303_ngI1a_Fom.jpg"}
                                         alt={selectedChat?.seller?.name}
                                         width={40}
                                         height={40}

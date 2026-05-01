@@ -19,8 +19,13 @@ const DEFAULT_DATA: OrderPoint[] = [
     { month: "Mar", count: 28 },
     { month: "Apr", count: 51 },
     { month: "May", count: 42 },
-    { month: "Jun", count: 109 },
-    { month: "Jul", count: 100 },
+    { month: "Jun", count: 50 },
+    { month: "Jul", count: 70 },
+    { month: "Aug", count: 80 },
+    { month: "Sep", count: 90 },
+    { month: "Oct", count: 100 },
+    { month: "Nov", count: 109 },
+    { month: "Dec", count: 130 },
 ];
 
 const SalesChart: React.FC<SalesChartProps> = ({ ordersData = DEFAULT_DATA, height = 320 }) => {

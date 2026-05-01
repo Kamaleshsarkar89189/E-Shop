@@ -139,22 +139,23 @@ const ProductList = () => {
             cell: ({ row }: any) => (
                 <div className="flex gap-3">
                     <Link
-                        href={`/product/${row.original.id}`}
+                        // href={`/dashboard/product/${row.original.id}`}
+                        href={`${process.env.NEXT_PUBLIC_USER_UI_LINK}/product/${row.original.slug}`}
                         className="text-blue-400 hover:text-blue-300 transition"
                     >
                         <Eye size={18} />
                     </Link>
                     <Link
-                        href={`/product/edit/${row.original.id}`}
+                        href={`/dashboard/edit/${row.original.slug}`}
                         className="text-yellow-400 hover:text-yellow-300 transition"
                     >
                         <Pencil size={18} />
                     </Link>
-                    <button
+                    {/* <button
                         className="text-green-400 hover:text-green-300 transition"
                     >
                         <BarChart size={18} />
-                    </button>
+                    </button> */}
                     <button
                         className="text-red-400 hover:text-red-300 transition"
                         onClick={() => openDeleteModal(row.original)}

@@ -20,6 +20,7 @@ const Customization = () => {
     const [newCategory, setNewCategory] = useState("");
     const [newSubCategory, setNewSubCategory] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [logoLoading, setLogoLoading] = useState(false);
 
     useEffect(() => {
         const fetchCustomization = async () => {
@@ -68,6 +69,75 @@ const Customization = () => {
             console.error("Error adding subcategory", error);
         }
     };
+
+    const convertFileToBase64 = (file: File) => {
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
+        });
+    };
+
+    const handleLogoChange = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const base64 = await convertFileToBase64(file);
+
+            const res = await axiosInstance.post(
+                "/admin/api/upload-site-logo",
+                {
+                    fileName: base64, // ✅ backend expects this
+                }
+            );
+
+            setLogo(res.data.file_url); // returned from ImageKit
+        } catch (error) {
+            console.error("Error changing logo", error);
+        }
+    };
+
+    const handleBannerChange = async (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const base64 = await convertFileToBase64(file);
+
+        const res = await axiosInstance.post(
+            "/admin/api/upload-site-banner",
+            { fileName: base64 }
+        );
+
+        setBanner(res.data.file_url);
+    };
+
+    const fetchLogo = async () => {
+        try {
+            setLogoLoading(true);
+            const res = await axiosInstance.get("/admin/api/get-site-logo");
+            setLogo(res.data.logo);
+            console.log("Logo", JSON.stringify(res))
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLogoLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        if (activeTab === "Logo") {
+            fetchLogo();
+        }
+    }, [activeTab]);
+
+
 
     return (
         <div className="w-full min-h-screen p-8 bg-[#0c0c0c] text-white">
@@ -161,14 +231,21 @@ const Customization = () => {
 
                     <div className="bg-gray-800/60 p-4 rounded-xl flex items-center justify-between shadow-md">
                         <div className="flex items-center gap-4">
-                            <img
-                                src={logo || "https://imgs.search.brave.com/eyRY5uaiLGM5frGLLGO6FeKUxOITJRXh-mf56aSPzWY/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pbWd2/My5mb3Rvci5jb20v/aW1hZ2VzL2hvbWVw/YWdlLWZlYXR1cmUt/Y2FyZC9mb3Rvci0z/ZC1hdmF0YXIuanBn"}
-                                alt="Logo"
-                                className="w-20 h-20 object-contain rounded-md border border-gray-700"
-                            />
+                            {logoLoading ? (
+                                <div className="w-20 h-20 bg-gray-700 animate-pulse rounded-md" />
+                            ) : (
+                                <img
+                                    src={logo || ""}
+                                    alt="Logo"
+                                    className="w-20 h-20 object-contain rounded-md border border-gray-700"
+                                />
+                            )}
+
                             <div>
                                 <p className="text-gray-200 font-medium">Logo</p>
-                                <p className="text-gray-400 text-xs">Click below to replace it</p>
+                                <p className="text-gray-400 text-xs">
+                                    Click below to replace it
+                                </p>
                             </div>
                         </div>
 
@@ -178,7 +255,7 @@ const Customization = () => {
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                // onChange={handleLogoChange}
+                                onChange={handleLogoChange}
                             />
                         </label>
                     </div>
@@ -209,7 +286,7 @@ const Customization = () => {
                                     type="file"
                                     accept="image/*"
                                     className="hidden"
-                                    // onChange={handleBannerChange}
+                                    onChange={handleBannerChange}
                                 />
                             </label>
                         </div>

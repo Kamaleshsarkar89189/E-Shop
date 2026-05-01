@@ -41,86 +41,93 @@ const SellerProfile = ({
     const deviceInfo = useDeviceTracking();
     const queryClient = useQueryClient();
 
-    // const { data: products, isLoading } = useQuery({
-    //     queryKey: ["seller-products"],
-    //     queryFn: async () => {
-    //         const res = await axiosInstance.get(
-    //             `/seller/api/get-seller-products/${shop?.id}?page=1&limit=10`
-    //         );
-    //         return res.data.products;
-    //     },
-    //     staleTime: 1000 * 60 * 5,
-    // });
+    const { data: products, isLoading } = useQuery({
+        queryKey: ["seller-products"],
+        queryFn: async () => {
+            const res = await axiosInstance.get(
+                `/product/api/get-seller-products/${shop?.id}?page=1&limit=10`
+            );
+            return res.data.products;
+        },
+        staleTime: 1000 * 60 * 5,
+    });
 
-    // useEffect(() => {
-    //     const fetchFollowStatus = async () => {
-    //         if (!shop?.id) return;
-    //         try {
-    //             const res = await axiosInstance.get(
-    //                 `/seller/api/is-following/${shop?.id}`
-    //             );
-    //             setIsFollowing(res.data.isFollowing !== null);
-    //         } catch (error) {
-    //             console.error("Failed to fetch follow status", error);
-    //         }
-    //     };
+    useEffect(() => {
+        const fetchFollowStatus = async () => {
+            if (!shop?.id) return;
+            try {
+                const res = await axiosInstance.get(
+                    `/product/api/is-following/${shop?.id}`,
+                    {
+                        params: { userId: user.id },
+                    }
+                );
+                setIsFollowing(res.data.isFollowing !== null);
+            } catch (error) {
+                console.error("Failed to fetch follow status", error);
+            }
+        };
 
-    //     fetchFollowStatus();
-    // }, [shop?.id]);
+        fetchFollowStatus();
+    }, [shop?.id]);
 
-    // const { data: events, isLoading: isEventsLoading } = useQuery({
-    //     queryKey: ["seller-events"],
-    //     queryFn: async () => {
-    //         const res = await axiosInstance.get(
-    //             `/seller/api/get-seller-events/${shop?.id}?page=1&limit=10`
-    //         );
-    //         return res.data.products;
-    //     },
-    //     staleTime: 1000 * 60 * 5,
-    // });
+    const { data: events, isLoading: isEventsLoading } = useQuery({
+        queryKey: ["seller-events"],
+        enabled: !!shop?.id,
+        queryFn: async () => {
+            const res = await axiosInstance.get(
+                `/product/api/get-seller-events/${shop?.id}?page=1&limit=10`
+            );
+            console.log("Data", JSON.stringify(res))
+            return res.data.products;
+        },
+        staleTime: 1000 * 60 * 5,
+    });
 
-    // const toggleFollowMutation = useMutation({
-    //     mutationFn: async () => {
-    //         if (isFollowing) {
-    //             await axiosInstance.post("/seller/api/unfollow-shop", {
-    //                 shopId: shop?.id,
-    //             });
-    //         } else {
-    //             await axiosInstance.post("/seller/api/follow-shop", {
-    //                 shopId: shop?.id,
-    //             });
-    //         }
-    //     },
-    //     onSuccess: () => {
-    //         // Flip state only after successful request
-    //         if (isFollowing) {
-    //             setFollowers(followers - 1);
-    //         } else {
-    //             setFollowers(followers + 1);
-    //         }
-    //         setIsFollowing((prev) => !prev);
-    //         queryClient.invalidateQueries({
-    //             queryKey: ["is-following", shop?.id],
-    //         });
-    //     },
-    //     onError: () => {
-    //         console.error("Failed to follow/unfollow the shop.");
-    //     },
-    // });
+    const toggleFollowMutation = useMutation({
+        mutationFn: async () => {
+            if (isFollowing) {
+                await axiosInstance.post("/product/api/unfollow-shop", {
+                    shopId: shop?.id,
+                    userId: user.id,
+                });
+            } else {
+                await axiosInstance.post("/product/api/follow-shop", {
+                    shopId: shop?.id,
+                    userId: user.id,
+                });
+            }
+        },
+        onSuccess: () => {
+            // Flip state only after successful request
+            if (isFollowing) {
+                setFollowers(followers - 1);
+            } else {
+                setFollowers(followers + 1);
+            }
+            setIsFollowing((prev) => !prev);
+            queryClient.invalidateQueries({
+                queryKey: ["is-following", shop?.id],
+            });
+        },
+        onError: () => {
+            console.error("Failed to follow/unfollow the shop.");
+        },
+    });
 
-    // useEffect(() => {
-    //     if (!isLoading) {
-    //         if (!location || !deviceInfo || !user?.id) return;
-    //         sendKafkaEvent({
-    //             userId: user?.id,
-    //             shopId: shop?.id,
-    //             action: "shop_visit",
-    //             country: location?.country || "Unknown",
-    //             city: location?.city || "Unknown",
-    //             device: deviceInfo || "Unknown Device",
-    //         });
-    //     }
-    // }, [location, deviceInfo, isLoading]);
+    useEffect(() => {
+        if (!isLoading) {
+            if (!location || !deviceInfo || !user?.id) return;
+            sendKafkaEvent({
+                userId: user?.id,
+                shopId: shop?.id,
+                action: "shop_visit",
+                country: location?.country || "Unknown",
+                city: location?.city || "Unknown",
+                device: deviceInfo || "Unknown Device",
+            });
+        }
+    }, [location, deviceInfo, isLoading]);
 
     return (
         <div>
@@ -185,8 +192,8 @@ const SellerProfile = ({
                                 ? "bg-red-500 hover:bg-red-600"
                                 : "bg-blue-600 hover:bg-blue-700"
                                 }`}
-                            // onClick={() => toggleFollowMutation.mutate()}
-                            // disabled={toggleFollowMutation.isPending}
+                        onClick={() => toggleFollowMutation.mutate()}
+                        disabled={toggleFollowMutation.isPending}
                         >
                             <Heart size={18} />
                             {isFollowing ? "Unfollow" : "Follow"}
@@ -258,7 +265,7 @@ const SellerProfile = ({
 
                 {/* Content */}
                 <div className="bg-gray-200 rounded-lg my-4 text-slate-700">
-                    {/* {activeTab === "Products" && (
+                    {activeTab === "Products" && (
                         <div className="m-auto grid grid-cols-1 p-4 sm:grid-cols-3 md:grid-cols-4">
                             {isLoading && (
                                 <>
@@ -266,7 +273,9 @@ const SellerProfile = ({
                                         <div
                                             key={index}
                                             className="h-[250px] bg-gray-300 animate-pulse rounded-xl"
-                                        ></div>
+                                        >
+
+                                        </div>
                                     ))}
                                 </>
                             )}
@@ -277,8 +286,8 @@ const SellerProfile = ({
                                 <p className="py-2">No products available yet!</p>
                             )}
                         </div>
-                    )} */}
-                    {/* {activeTab === "Offers" && (
+                    )}
+                    {activeTab === "Offers" && (
                         <div className="m-auto grid grid-cols-1 p-4 sm:grid-cols-3 md:grid-cols-4">
                             {isEventsLoading && (
                                 <>
@@ -301,7 +310,7 @@ const SellerProfile = ({
                                 <p className="py-2">No offers available yet!</p>
                             )}
                         </div>
-                    )} */}
+                    )}
                     {activeTab === "Reviews" && (
                         <div>
                             <p className="text-center py-5">No Reviews available yet!</p>

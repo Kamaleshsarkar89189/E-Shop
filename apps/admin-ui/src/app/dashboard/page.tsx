@@ -16,24 +16,58 @@ import {
 } from "recharts";
 import GeographicalMap from "../../shared/components/charts/geographicalMap";
 import SalesChart from "../../shared/components/charts/sale-chart";
+import axiosInstance from "../../utils/axiosInstance";
+import { useQuery } from "@tanstack/react-query";
 
-// Device data
-const deviceData = [
-  { name: "Phone", value: 55 },
-  { name: "Tablet", value: 20 },
-  { name: "Computer", value: 25 },
+//Fetch all orders
+const fetchOrders = async () => {
+  const res = await axiosInstance.get("/order/api/get-admin-orders");
+  return res.data.orders;
+};
+
+// Fetch user analytics
+// const fetchUserAnalytics = async () => {
+//   const res = await axiosInstance.get("/analytics/api/get-user-analytics");
+//   return res.data.analytics;
+// };
+
+const DUMMY_ANALYTICS = [
+  {
+    device: "Desktop - Windows 10 - Chrome 142.0.0.0",
+  },
+  {
+    device: "Android Phone - Chrome",
+  },
+  {
+    device: "iPhone - Safari",
+  },
+  {
+    device: "iPad - Safari",
+  },
+  {
+    device: "Desktop - macOS - Chrome",
+  },
 ];
+
+const fetchUserAnalytics = async () => {
+  try {
+    const res = await axiosInstance.get("/analytics/api/get-user-analytics"); //Api creation due
+
+    // if API returns empty array → fallback
+    if (!res.data?.analytics?.length) {
+      return DUMMY_ANALYTICS;
+    }
+
+    return res.data.analytics;
+  } catch (error) {
+    console.warn("Using dummy analytics data");
+    return DUMMY_ANALYTICS;
+  }
+};
+
+
+
 const COLORS = ["#4ade80", "#facc15", "#60a5fa"];
-
-// Orders data
-const orders = [
-  { id: "ORD-001", customer: "John Doe", amount: "$250", status: "Paid" },
-  { id: "ORD-002", customer: "Jane Smith", amount: "$180", status: "Pending" },
-  { id: "ORD-003", customer: "Alice Johnson", amount: "$340", status: "Paid" },
-  { id: "ORD-004", customer: "Bob Lee", amount: "$90", status: "Failed" },
-  { id: "ORD-005", customer: "Bob Lee", amount: "$90", status: "Failed" },
-  { id: "ORD-006", customer: "Bob Lee", amount: "$90", status: "Failed" },
-];
 
 // Orders table columns
 const columns = [
@@ -66,11 +100,39 @@ const columns = [
 ];
 
 const OrdersTable = () => {
+  const { data: formattedOrders = [], isLoading, isError } = useQuery({
+    queryKey: ["admin-orders", "latest-7"],
+    queryFn: fetchOrders,
+    select: (orders: any[]) =>
+      orders
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        )
+        .slice(0, 7)
+        .map((order) => ({
+          id: order.id,
+          customer: order.user?.name ?? "N/A",
+          amount: `₹${order.total}`,
+          status: order.status,
+        })),
+  });
+
   const table = useReactTable({
-    data: orders,
+    data: formattedOrders,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (isLoading) {
+    return <p className="text-white">Loading orders...</p>;
+  }
+
+  if (isError) {
+    return <p className="text-red-500">Failed to load orders</p>;
+  }
+
 
   return (
     <div className="mt-6">
@@ -112,12 +174,44 @@ const OrdersTable = () => {
           </tbody>
         </table>
       </div>
-      </div>
+    </div>
   );
 };
 
 // Dashboard Layout
 const DashboardPage = () => {
+  const buildDeviceData = (analytics: any[]) => {
+    const counts = {
+      Phone: 0,
+      Tablet: 0,
+      Computer: 0,
+    };
+
+    analytics.forEach((item) => {
+      const device = item.device?.toLowerCase() || "";
+
+      if (device.includes("android") || device.includes("iphone") || device.includes("mobile")) {
+        counts.Phone += 1;
+      } else if (device.includes("tablet") || device.includes("ipad")) {
+        counts.Tablet += 1;
+      } else {
+        counts.Computer += 1; // default → desktop/laptop
+      }
+    });
+
+    return [
+      { name: "Phone", value: counts.Phone },
+      { name: "Tablet", value: counts.Tablet },
+      { name: "Computer", value: counts.Computer },
+    ];
+  };
+
+  const { data: deviceData = [] } = useQuery({
+    queryKey: ["device-analytics"],
+    queryFn: fetchUserAnalytics,
+    select: (analytics) => buildDeviceData(analytics),
+  });
+
   return (
     <div className="p-8">
       {/* Top Charts */}

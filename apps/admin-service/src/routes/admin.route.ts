@@ -1,7 +1,7 @@
 import { isAdmin, isSeller } from "@packages/middleware/authorizeRoles";
 import isAuthenticated from "@packages/middleware/isAuthenticated";
 import express, { Router } from "express";
-import { addNewAdmin, getAllAdmins, getAllCustomizations, getAllEvents, getAllNotifications, getAllProducts, getAllSellers, getAllUsers, getUserNotifications, markNotificationAsRead, sellerNotifications } from "../controllers/admin.controller";
+import { addCategory, addNewAdmin, addSubCategory, getAllAdmins, getAllCustomizations, getAllEvents, getAllNotifications, getAllProducts, getAllSellers, getAllUsers, getSiteBanner, getSiteLogo, getUserNotifications, markNotificationAsRead, sellerNotifications, uploadSiteBanner, uploadSiteLogo } from "../controllers/admin.controller";
 
 const router: Router = express.Router();
 
@@ -25,4 +25,12 @@ router.post(
 );
 
 router.get("/seller-notifications", isAuthenticated, isSeller, sellerNotifications);
+router.post("/add-category", isAuthenticated, addCategory);
+router.post("/add-subcategory", isAuthenticated, addSubCategory);
+router.post("/upload-site-logo", isAuthenticated, uploadSiteLogo);
+router.get("/get-site-logo", getSiteLogo);
+router.post("/upload-site-banner", uploadSiteBanner);
+router.get("/get-site-banner", getSiteBanner);
+
+
 export default router;
