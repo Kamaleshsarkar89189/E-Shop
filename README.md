@@ -1,82 +1,110 @@
-# 
+# 🛒 E-Shop Microservices Platform
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A scalable **E-Commerce Platform** built with **Microservice Architecture**, powered by **Nx Monorepo**, **Node.js**, **Express.js**, **Kafka**, **Redis**, **MongoDB**, and deployed on **AWS** using **Docker**.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+---
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/node?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+# 🚀 Technology Stack
 
-## Finish your CI setup
+## 🏗️ Architecture
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/vKZgT3NHTJ)
+| Technology | Purpose |
+|------------|---------|
+| 🏛️ Microservice Architecture | Independent scalable backend services |
+| Nx Monorepo | Monorepo management and code sharing |
+| Docker | Containerization |
+| AWS EC2 | Deployment & Production |
+| Cloudflare | Domain & DNS Management |
 
+---
 
-## Run tasks
+## 💻 Backend
 
-To run the dev server for your app, use:
+| Technology | Purpose |
+|------------|---------|
+| Node.js | Runtime Environment |
+| Express.js | Backend Framework |
+| TypeScript | Type Safety |
+| Socket.IO / WebSocket | Real-time Communication |
+| Kafka | Event Streaming & Message Broker |
+| Redis | Cache & Pub/Sub |
 
-```sh
-npx nx serve auth-service
-```
+---
 
-To create a production bundle:
+## 🗄️ Database
 
-```sh
-npx nx build auth-service
-```
+| Technology | Purpose |
+|------------|---------|
+| MongoDB | Primary Database |
+| Redis | Secondary Database / Cache |
+| Prisma ORM | Database ORM |
 
-To see all available targets to run for a project, run:
+---
 
-```sh
-npx nx show project auth-service
-```
+## 🌐 Frontend
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+| Technology | Purpose |
+|------------|---------|
+| Next.js | Frontend Framework |
+| React.js | UI Library |
+| Tailwind CSS | Styling |
+| Shadcn UI | UI Components |
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Add new projects
+## 🤖 Machine Learning
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+| Technology | Purpose |
+|------------|---------|
+| TensorFlow.js | Product Recommendation / ML |
 
-Use the plugin's generator to create new projects.
+---
 
-To generate a new application, use:
+## 🔔 Notifications
 
-```sh
-npx nx g @nx/node:app demo
-```
+| Technology | Purpose |
+|------------|---------|
+| Firebase Cloud Messaging | Push Notifications |
+| WebSocket | Live Updates |
 
-To generate a new library, use:
+---
 
-```sh
-npx nx g @nx/node:lib mylib
-```
+## 🧪 API Development
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+| Technology | Purpose |
+|------------|---------|
+| Postman | API Testing |
+| Swagger (OpenAPI) | API Documentation |
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
+## ⚙️ DevOps
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Technology | Purpose |
+|------------|---------|
+| GitHub Actions | CI/CD |
+| Docker Compose | Multi-container Development |
+| Nginx | Reverse Proxy |
 
-## Install Nx Console
+---
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+# 🛠️ Tech Badges
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+![NodeJS](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
+![NextJS](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
+![Kafka](https://img.shields.io/badge/Kafka-000000?style=for-the-badge&logo=apachekafka&logoColor=white)
+![Nx](https://img.shields.io/badge/Nx-143055?style=for-the-badge&logo=nx&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=FF9900)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow.js-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/node?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---

@@ -1252,16 +1252,23 @@ export const getShopProfile = async (req, res, next) => {
     }
 };
 
-export const updateProduct = async (req: Request, res: Response) => {
+// Update Product
+export const updateProduct = async (
+    req: Request,
+    res: Response
+) => {
     try {
         const { id } = req.params;
 
-        const existingProduct = await prisma.products.findUnique({
-            where: { slug: id },
-        });
+        const existingProduct =
+            await prisma.products.findUnique({
+                where: { slug: id },
+            });
 
         if (!existingProduct) {
-            return res.status(404).json({ message: 'Product not found' });
+            return res.status(404).json({
+                message: "Product not found",
+            });
         }
 
         const {
@@ -1287,60 +1294,108 @@ export const updateProduct = async (req: Request, res: Response) => {
             images = [],
         } = req.body;
 
-        // 🔥 STEP 1: delete old images
+        // ✅ DELETE OLD IMAGES
         // await prisma.productImages.deleteMany({
-        //     where: { productId: id },
+        //     where: {
+        //         productId: existingProduct.id,
+        //     },
         // });
 
-        // 🔥 STEP 2: update product + recreate images
-        const updatedProduct = await prisma.products.update({
-            where: { slug: id },
-            data: {
-                title,
-                short_description,
-                tags,
-                warranty,
-                slug,
-                brand,
-                category,
-                subCategory,
-                detailed_description,
-                video_url,
-                regular_price: Number(regular_price),
-                sale_price: Number(sale_price),
-                stock: Number(stock),
-                cashOnDelivery: cash_on_delivery,
-                colors,
-                sizes,
-                custom_specifications: specifications,
-                custom_properties: properties,
-                discount_codes: discountCodes,
-
-                // ✅ FIXED IMAGES
-                images: {
-                    create: images
-                        .filter((img: any) => img && img.fileId && img.file_url)
-                        .map((img: any) => ({
-                            file_id: img.fileId,
-                            url: img.file_url,
-                        })),
+        // ✅ UPDATE PRODUCT
+        const updatedProduct =
+            await prisma.products.update({
+                where: {
+                    slug: id,
                 },
-            },
-            include: { images: true },
-        });
+
+                data: {
+                    title,
+                    short_description,
+
+                    tags: Array.isArray(tags)
+                        ? tags
+                        : [],
+
+                    warranty,
+                    slug,
+                    brand,
+                    category,
+                    subCategory,
+                    detailed_description,
+                    video_url,
+
+                    regular_price: Number(
+                        regular_price
+                    ),
+
+                    sale_price: Number(
+                        sale_price
+                    ),
+
+                    stock: Number(stock),
+
+                    cashOnDelivery:
+                        cash_on_delivery,
+
+                    colors: colors || [],
+
+                    sizes: sizes || [],
+
+                    custom_specifications:
+                        specifications || {},
+
+                    custom_properties:
+                        properties || {},
+
+                    discount_codes:
+                        discountCodes || [],
+
+                    images: {
+                        create: Array.isArray(
+                            images
+                        )
+                            ? images
+                                .filter(
+                                    (img: any) =>
+                                        img &&
+                                        img.fileId &&
+                                        img.file_url
+                                )
+                                .map((img: any) => ({
+                                    file_id:
+                                        img.fileId,
+                                    url: img.file_url,
+                                }))
+                            : [],
+                    },
+                },
+
+                include: {
+                    images: true,
+                },
+            });
 
         return res.status(200).json({
-            message: 'Product updated successfully',
+            message:
+                "Product updated successfully",
+
             product: updatedProduct,
         });
+
     } catch (error: any) {
+
+        console.log(error);
+
         return res.status(500).json({
-            message: 'Failed to update product',
+            message:
+                "Failed to update product",
+
             error: error.message,
         });
     }
 };
 
+// Get Product By Id
 export const getProductById = async (
     req: any,
     res: Response,
